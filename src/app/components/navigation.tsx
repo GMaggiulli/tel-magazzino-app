@@ -27,7 +27,7 @@ export const AppNavigationMenu = (): JSX.Element =>
 	<div class="container h-100 py-2 d-flex flex-column" >
 		<div class="d-flex flex-row" >
 			<div >
-				<h1 class="h1" style="font-family: 'Sour Gummy';" >Buytopia</h1>
+				<h1 class="h1 user-select-none" style="font-family: 'Sour Gummy';" >Buytopia</h1>
 			</div>
 			<div class="py-2 d-flex flex-row" style="margin-left: auto;" >
 				<ViewAccountButton />

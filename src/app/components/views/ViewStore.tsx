@@ -51,22 +51,22 @@ export const ViewStore = (): JSX.Element =>
 
 
 	return (<>
-	<aside class="h-100 bg-body-secondary rounded p-2" style="min-width: 300px;" >
-				<p class="fw-bold" style="font-size: 1.3em;" >Filtri</p>
-			</aside>
+		<aside class="h-100 bg-body-secondary rounded p-2" style="min-width: 300px;" >
+			<p class="fw-bold" style="font-size: 1.3em;" >Filtri</p>
+		</aside>
 
-			<main class="w-100 h-100 d-flex flex-column" >
+		<main class="w-100 h-100 d-flex flex-column" >
 
-				<div class="container w-100 py-2" >
-					<SearchQuery name="string-query-products"
-						value={queryString} onChange={changeQuery} />
-				</div>
+			<div class="container w-100 py-2" >
+				<SearchQuery name="string-query-products"
+					value={queryString} onChange={changeQuery} />
+			</div>
 
-				{isLoading ? <WaitProductLoading />
-					: productsGrid.length === 0
-						? <MsgNoProducts />
-						: <ContainerProducts children={productsGrid} />}
-			</main>
+			{isLoading ? <WaitProductLoading />
+				: productsGrid.length === 0
+					? <MsgNoProducts />
+					: <ContainerProducts children={productsGrid} />}
+		</main>
 	</>);
 }
 

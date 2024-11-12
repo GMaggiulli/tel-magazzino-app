@@ -34,9 +34,9 @@ export const MsgNoProducts = (): JSX.Element =>
 	// la ricerca corrente.
 
 	return (
-	<div class="w-100 px-2" >
+	<div class="w-100 px-2 my-2 px-4" >
 		<div class="alert alert-danger fade-in" role="alert">
-			<span>Nessun prodotto trovato!</span>
+			<span class="user-select-none" >Nessun prodotto trovato!</span>
 		</div>
 	</div>
 	);
@@ -54,7 +54,7 @@ export const ContainerProducts = (props: IContainerProducts): JSX.Element =>
 	// mostra la lista dei proddotti già filtrata.
 
 	return (
-		<div class="w-100 h-100 overflow-y-scroll" >
+		<div class="w-100 h-100 overflow-y-scroll px-4" >
 			<div class="px-2 d-grid gap-2" style="height: fit-content; grid-template-columns: repeat( auto-fit, minmax(260px, 1fr) );" children={props.children} />
 		</div>
 	);
