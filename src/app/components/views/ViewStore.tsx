@@ -58,8 +58,37 @@ export const ViewStore = (): JSX.Element =>
 
 
 	return (<>
-		<aside class="h-100 bg-body-secondary rounded p-2" style="min-width: 300px;" >
-			<p class="fw-bold" style="font-size: 1.3em;" >Filtri</p>
+		<aside class="h-100 bg-body-secondary rounded p-2 d-flex flex-column" style="min-width: 300px;" >
+			<p class="fw-bold fs-5 mx-2" >Filtri</p>
+			<div class="w-100 h-100 d-flex flex-column overflow-y-auto gap-2" >
+
+				<div class="container border border-secondary rounded p-2" >
+					<p class="fs-6 fw-bold m-2" >Gruppi</p>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="filter-bookmarks" />
+						<label class="form-check-label user-select-none" for="filter-bookmarks">
+							Preferiti
+						</label>
+					</div>
+				</div>
+
+				<div class="container border border-secondary rounded p-2" >
+					<p class="fs-6 fw-bold m-2" >Dispositivi</p>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="filter-phones" />
+						<label class="form-check-label user-select-none" for="filter-phones">Telefoni</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="filter-computers" />
+						<label class="form-check-label user-select-none" for="filter-computers">Computer</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="filter-screens" />
+						<label class="form-check-label user-select-none" for="filter-screens">Schermi</label>
+					</div>
+				</div>
+
+			</div>
 		</aside>
 
 		<main class="w-100 h-100 d-flex flex-column" >
