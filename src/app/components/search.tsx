@@ -24,27 +24,18 @@ export interface ISearchQueryProps
 	name: string,
 	value: string,
 	onChange: (newvalue: string) => void,
+	onUpdateSearch: () => void,
 };
 
 
 export const SearchQuery = (props: ISearchQueryProps): JSX.Element =>
 {
-	const { onChange } = props;
+	const { onChange, onUpdateSearch } = props;
 
 	const randomString: string = useMemo(() =>
 		SEARCH_STRINGS[Math.floor(SEARCH_STRINGS.length * Math.random())], [props.value.length === 0]);
 
 	const isEmpty: boolean = props.value.trim().length === 0;
-
-	const onClearQueryClick = (): void =>
-	{
-		if (isEmpty)
-		{
-			return;
-		}
-
-		onChange("");
-	}
 
 	return (
 	<div class="d-flex flex-row" >
@@ -65,13 +56,14 @@ export const SearchQuery = (props: ISearchQueryProps): JSX.Element =>
 		<button class="btn btn-outline-primary p-0 mx-1"
 			style="min-width: 48px;"
 			disabled={isEmpty}
-			onClick={onClearQueryClick} >
+			onClick={() => onChange("")} >
 			<i class="bi bi-x"></i>
 		</button>
 		
 		<button class="btn btn-primary"
 			style="min-width: 96px;"
-			disabled={isEmpty}>
+			disabled={isEmpty}
+			onClick={() => !isEmpty ? onUpdateSearch() : null} >
 			<span>Cerca</span>
 		</button>
 	</div>

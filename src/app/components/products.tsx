@@ -55,7 +55,7 @@ export const ContainerProducts = (props: IContainerProducts): JSX.Element =>
 
 	return (
 		<div class="w-100 h-100 overflow-y-scroll px-4" >
-			<div class="px-2 d-grid gap-2" style="height: fit-content; grid-template-columns: repeat( auto-fit, minmax(260px, 1fr) );" children={props.children} />
+			<div class="px-2 d-grid gap-2" style="height: fit-content; grid-template-columns: repeat(auto-fit, 260px);" children={props.children} />
 		</div>
 	);
 }
@@ -75,8 +75,8 @@ export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 
 	return (
 	<div class="card" >
-		<div class="card-img-top d-flex justify-content-center">
-			<img height={150} src={props.imgSrc} />
+		<div class="card-img-top d-flex justify-content-center py-2">
+			<img class="user-select-none" height={150} src={props.imgSrc} />
 		</div>
 		<div class="card-body">
 			<p class="card-title">{props.title}</p>

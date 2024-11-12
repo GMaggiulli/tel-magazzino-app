@@ -4,12 +4,13 @@ import { SearchQuery } from "@/app/components/search";
 import { DatabaseAccess, IProduct } from "@/scripts/DatabaseAccess";
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
+import { useSessionStorage } from "usehooks-ts";
 
 // --------------------------------------------------------
 
 export const ViewStore = (): JSX.Element =>
 {
-	const [queryString, changeQuery] = useState<string>('');
+	const [queryString, changeQuery] = useSessionStorage('last-query', "");
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const [foundProducts, setProducts] = useState<IProduct[]>([]);
 
@@ -17,37 +18,43 @@ export const ViewStore = (): JSX.Element =>
 		.map(product => (<ItemProduct title={product.title} imgSrc={product.imgSrc} />));
 
 
-	useEffect(() =>
+	const updateQuery = (): NodeJS.Timeout =>
+	{
+		const db = new DatabaseAccess();
+
+		setLoading(true);
+
+		return setTimeout(() =>
 		{
-			const db = new DatabaseAccess();
-	
-			// finto caricamento / lag del database.
-	
-			let fakeTimeout: NodeJS.Timeout | null = null;
-	
-			const timeout = setTimeout(() =>
+			setProducts(db.findByName(queryString));
+			setLoading(false);
+		}, Math.random() * 500);
+	}
+
+
+	useEffect(() =>
+	{
+		// finto caricamento / lag del database.
+
+		let fakeTimeout: null | NodeJS.Timeout = null;
+
+		// evitiamo di inviare una richiesta per ogni carattere scritto.
+		// piccolo delay per rimuovere flickering.
+		const keyTimeout = setTimeout(() =>
+		{		// hack! delay ridotto a 0 se la query è vuota.
+			fakeTimeout = updateQuery();
+		}, queryString.length > 0 ? 300 : 0);
+
+		return () =>
+		{
+			clearTimeout(keyTimeout);
+
+			if (fakeTimeout)
 			{
-	
-				fakeTimeout = setTimeout(() =>
-				{
-					setProducts(db.findByName(queryString));
-					setLoading(false);
-				}, Math.random() * 500);
-	
-			}, 200);
-	
-			return () =>
-			{
-				clearTimeout(timeout);
-	
-				if (fakeTimeout)
-				{
-					clearTimeout(fakeTimeout);
-				}
-	
-				setLoading(true);
+				clearTimeout(fakeTimeout);
 			}
-		}, [queryString]);
+		}
+	}, [queryString]);
 
 
 	return (<>
@@ -59,7 +66,9 @@ export const ViewStore = (): JSX.Element =>
 
 			<div class="container w-100 py-2" >
 				<SearchQuery name="string-query-products"
-					value={queryString} onChange={changeQuery} />
+					value={queryString}
+					onChange={changeQuery}
+					onUpdateSearch={updateQuery} />
 			</div>
 
 			{isLoading ? <WaitProductLoading />
