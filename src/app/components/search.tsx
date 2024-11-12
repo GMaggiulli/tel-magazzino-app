@@ -31,8 +31,8 @@ export const SearchQuery = (props: ISearchQueryProps): JSX.Element =>
 {
 	const { onChange } = props;
 
-	const randomSearchString: string = useMemo(() =>
-		SEARCH_STRINGS[Math.floor(SEARCH_STRINGS.length * Math.random())], []);
+	const randomString: string = useMemo(() =>
+		SEARCH_STRINGS[Math.floor(SEARCH_STRINGS.length * Math.random())], [props.value.length === 0]);
 
 	const isEmpty: boolean = props.value.trim().length === 0;
 
@@ -56,7 +56,7 @@ export const SearchQuery = (props: ISearchQueryProps): JSX.Element =>
 
 			<input class="form-control col"
 				name={props.name} value={props.value}
-				placeholder={randomSearchString}
+				placeholder={randomString}
 				type="text"
 				onInput={ev => onChange((ev.target as HTMLInputElement).value)} />
 

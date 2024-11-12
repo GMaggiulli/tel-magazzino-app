@@ -23,6 +23,26 @@ const FAKE_PRODUCTS_DATABASE: IProduct[] =
 	{
 		title: "Telefono 3",
 		imgSrc: "IMG001.jpg"
+	},
+	{
+		title: "Telefono 3",
+		imgSrc: "IMG001.jpg"
+	},
+	{
+		title: "Telefono 3",
+		imgSrc: "IMG001.jpg"
+	},
+	{
+		title: "Telefono 3",
+		imgSrc: "IMG001.jpg"
+	},
+	{
+		title: "Telefono 3",
+		imgSrc: "IMG001.jpg"
+	},
+	{
+		title: "Telefono 3",
+		imgSrc: "IMG001.jpg"
 	}
 ];
 
