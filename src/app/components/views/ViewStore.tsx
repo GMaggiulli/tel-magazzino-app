@@ -8,6 +8,28 @@ import { useSessionStorage } from "usehooks-ts";
 
 // --------------------------------------------------------
 
+export interface IViewStoreButtonProps
+{
+	onClick: () => void,
+}
+
+
+export const ViewStoreButton = (props: IViewStoreButtonProps): JSX.Element =>
+{
+	const { onClick } = props;
+
+	return (
+	<button class="btn btn-info d-flex flex-row gap-2 align-content-center justify-content-center"
+		onClick={onClick} >
+		<i class="bi bi-shop"></i>
+		<span class="fs-6 fw-bold" >Acquista</span>
+	</button>
+	);
+}
+
+
+// --------------------------------------------------------
+
 export const ViewStore = (): JSX.Element =>
 {
 	const [queryString, changeQuery] = useSessionStorage('last-query', "");
@@ -62,7 +84,7 @@ export const ViewStore = (): JSX.Element =>
 			<p class="fw-bold fs-5 mx-2" >Filtri</p>
 			<div class="w-100 h-100 d-flex flex-column overflow-y-auto gap-2" >
 
-				<div class="container border border-secondary rounded p-2" >
+				{/* <div class="container border border-secondary rounded p-2" >
 					<p class="fs-6 fw-bold m-2" >Gruppi</p>
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" value="" id="filter-bookmarks" />
@@ -70,7 +92,7 @@ export const ViewStore = (): JSX.Element =>
 							Preferiti
 						</label>
 					</div>
-				</div>
+				</div> */}
 
 				<div class="container border border-secondary rounded p-2" >
 					<p class="fs-6 fw-bold m-2" >Dispositivi</p>
