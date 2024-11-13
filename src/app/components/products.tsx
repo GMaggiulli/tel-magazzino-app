@@ -153,16 +153,12 @@ export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 		<div class="card-img-top d-flex justify-content-center py-2">
 			<img class="user-select-none" height={150} src={product.url_image} />
 		</div>
-		<div class="card-body">
-			<p class="card-title">{product.name}</p>
-			<p class="card-text">{product.description}</p>
-			<div class="px-2 d-flex flex-row gap-1" >
-				<button class="btn btn-primary">
-					<i class="bi bi-bag"></i>
-					<span class="m-1" >Scopri</span>
-				</button>
+		<div class="card-body h-100">
+			<div class="px-2 d-flex flex-row gap-1 justify-content-center mb-4">
 				<FavoriteButton productId={product.product_id} />
 			</div>
+			<p class="card-title user-select-none">{product.name}</p>
+			<p class="card-text user-select-none fst-italic" style="font-size: 0.8em;">{product.description}</p>
 		</div>
 	</div>
 	);

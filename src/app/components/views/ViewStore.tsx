@@ -75,11 +75,11 @@ export const ViewStore = (): JSX.Element =>
 		.map(product => (<ItemProduct product={product} />));
 
 	return (<>
-		<aside class="h-100 bg-body-secondary rounded p-2 d-flex flex-column" style="min-width: 300px;" >
+		{/* <aside class="h-100 bg-body-secondary rounded p-2 d-flex flex-column" style="min-width: 300px;" >
 			<p class="fw-bold fs-5 mx-2" >Filtri</p>
 			<div class="w-100 h-100 d-flex flex-column overflow-y-auto gap-2" >
 
-				{/* <div class="container border border-secondary rounded p-2" >
+				<div class="container border border-secondary rounded p-2" >
 					<p class="fs-6 fw-bold m-2" >Gruppi</p>
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" value="" id="filter-bookmarks" />
@@ -87,7 +87,7 @@ export const ViewStore = (): JSX.Element =>
 							Preferiti
 						</label>
 					</div>
-				</div> */}
+				</div>
 
 				<div class="container border border-secondary rounded p-2" >
 					<p class="fs-6 fw-bold m-2" >Dispositivi</p>
@@ -106,7 +106,7 @@ export const ViewStore = (): JSX.Element =>
 				</div>
 
 			</div>
-		</aside>
+		</aside> */}
 
 		<main class="w-100 h-100 d-flex flex-column" >
 
@@ -116,7 +116,7 @@ export const ViewStore = (): JSX.Element =>
 					onChange={changeQuery}
 					onUpdateSearch={onQueryUpdate} />
 				{working
-					? <p class="m-2" >Eseguento la query...</p>
+					? <p class="m-2" >Eseguendo la query...</p>
 					: <p class="m-2" >Prodotti trovati: {productsGrid.length}</p>}
 			</div>
 

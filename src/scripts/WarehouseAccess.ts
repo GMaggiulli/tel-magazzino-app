@@ -18,19 +18,52 @@ const FOLDER_IMAGES: string = "images/";
 
 const FAKE_PRODUCTS_DATABASE: IDbProduct[] = [];
 
-for (let i = 0; i < 200; i++)
-{		// genera dei prodotti artificialmente.
-	FAKE_PRODUCTS_DATABASE.push({
-		product_id: i,
-		avaiable: Math.random() > 0.5,
-		category_id: 0,
-		create_at: new Date(),
-		deleted_at: Math.random() > 0.8 ? new Date(Date.now() + 3000) : null,
-		name: `Telefono ${i + 1}`,
-		description: "Ciao!",
-		updated_at: new Date(),
-		url_image: `IMG00${Math.floor(1 + (Math.random() * 8))}.jpg`,
-	});
+const fakeDatabaseRaw = localStorage.getItem('__products');
+
+if (!fakeDatabaseRaw)
+{
+	const FAKE_NAMES: string[] =
+	[
+		"Motorola G",
+		"Motorola A",
+		"Motorola B",
+		"Samsung A",
+		"Samsung S",
+		"Samsung Fold ",
+		"Apple IPhone ",
+	];
+
+
+	const FAKE_DESCRIPTION: string[] =
+	[
+		"Il telefono ideale per chi cerca un dispositivo semplice e accessibile. Dotato di funzionalità basiche come chiamate, SMS e navigazione web.",
+		"Il telefono perfetto per gli appassionati di giochi. Dotato di un processore potente, una batteria lunga durata e una grafica di alta qualità.",
+		"Il telefono ideale per gli amanti della fotografia. Dotato di una fotocamera di alta qualità con funzionalità avanzate come zoom ottico e stabilizzazione dell'immagine.",
+		"Il telefono perfetto per gli imprenditori e i professionisti. Dotato di funzionalità avanzate come email, calendario e accesso a documenti cloud.",
+		"Il telefono ideale per chi cerca un dispositivo resistente e duraturo. Dotato di una costruzione robusta e funzionalità come resistenza all'acqua e alla polvere.",
+	]
+
+
+	for (let i = 0; i < 100; ++i)
+	{
+		FAKE_PRODUCTS_DATABASE.push({
+			product_id: i,
+			avaiable: Math.random() > 0.5,
+			category_id: 0,
+			create_at: new Date(Date.now() - 5_000),
+			deleted_at: null,
+			name: `${FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)]}${i + 1 + Math.floor(Math.random() * 20)}`,
+			description: FAKE_DESCRIPTION[Math.floor(Math.random() * FAKE_DESCRIPTION.length)],
+			updated_at: new Date(),
+			url_image: `IMG00${Math.floor(1 + (Math.random() * 8))}.jpg`,
+		});
+	}
+
+	localStorage.setItem('__products', JSON.stringify(FAKE_PRODUCTS_DATABASE));
+}
+else
+{
+	FAKE_PRODUCTS_DATABASE.push(...JSON.parse(fakeDatabaseRaw)!);
 }
 
 
