@@ -37,7 +37,10 @@ export const ViewStore = (): JSX.Element =>
 	const [foundProducts, setProducts] = useState<IProduct[]>([]);
 
 	const productsGrid = foundProducts
-		.map(product => (<ItemProduct title={product.title} imgSrc={product.imgSrc} />));
+		.map(product => (<ItemProduct
+			productId={product.id}
+			title={product.title}
+			imgSrc={product.imgSrc} />));
 
 
 	const updateQuery = (): NodeJS.Timeout =>

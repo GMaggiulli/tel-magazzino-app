@@ -16,14 +16,14 @@ export const ViewAccountButton = (props: IViewAccountButtonProps): JSX.Element =
 {
 	const { onClick } = props;
 
-	const { account, changeAccount } = useContext(UserAccess)!;
+	const { account } = useContext(UserAccess)!;
 
 	return (
 	<button class="btn btn-info d-flex flex-row gap-2 align-content-center justify-content-center"
 	onClick={onClick} >
 		<i class="bi bi-person-circle"></i>
 		<span class="fs-6" >{account
-			? `Bentornato ${account.getAccount()?.first_name}`
+			? `Bentornato ${account.getProfile().first_name}`
 			: "Accedi"}</span>
 	</button>
 	);
@@ -46,7 +46,7 @@ export const ViewAccessRegister = (): JSX.Element =>
 
 	const onClickRegister = (): void =>
 	{
-		AccountManager.fromNew(email, password1, firstName, lastName, new Date(Date.parse(birthday)))
+		AccountManager.fromRegister(sessionStorage, email, password1, firstName, lastName, birthday)
 		.then(account =>
 			{
 				account.saveAccess();
@@ -110,9 +110,28 @@ export const ViewAccessLogin = (): JSX.Element =>
 {
 	const { changeAccount } = useContext(UserAccess)!;
 
+	const [name, setName]			= useState<string>("");
+	const [password, setPassword]	= useState<string>("");
+
 	const onRecoverPassword = (): void =>
 	{
-		alert("Errore: perfavore inserisci 100 € nel computer.");
+		const email = window.prompt("Inserisci email, se appartiene ad un profilo verrà inviato una email per il recupero della password.");
+
+		if (typeof email === 'string')
+		{
+			alert("Bene! Adesso inserisci 100 € nel computer per continuare.");
+		}
+	}
+
+	const onClickLogin = (): void =>
+	{
+		AccountManager.fromLogin(sessionStorage, name, password)
+			.then(access =>
+			{		// accesso ad account esistente ottenuto!
+				changeAccount(access);
+				access.saveAccess();
+			})
+			.catch(err => alert(err));
 	}
 
 	return (
@@ -122,15 +141,17 @@ export const ViewAccessLogin = (): JSX.Element =>
 
 			<div class="mb-3">
 				<label for="login-email" class="form-label user-select-none">Email</label>
-				<input type="email" class="form-control" id="login-email" placeholder="name@example.com" />
+				<input type="email" class="form-control" id="login-email" placeholder="name@example.com"
+					value={name} onInput={ev => setName((ev.target as HTMLInputElement).value)} />
 			</div>
 
 			<div class="mb-3">
 				<label for="login-password" class="form-label user-select-none">Password</label>
-				<input type="password" class="form-control" id="login-password" />
+				<input type="password" class="form-control" id="login-password"
+					value={password} onInput={ev => setPassword((ev.target as HTMLInputElement).value)}  />
 			</div>
 
-			<button class="btn btn-primary mb-3" >
+			<button class="btn btn-primary mb-3" onClick={onClickLogin} >
 				Accedi
 			</button>
 

@@ -20,13 +20,13 @@ const ARRAY_VIEWS: (() => JSX.Element)[] =
 
 export const MainActivity = (): JSX.Element =>
 {
-	const [currView, setView] = useState<number>(0);
-	const [account, setAccount] = useState<AccountManager | null>(null);
+	const [currView, setView]	= useState<number>(0);
+	const [account, setAccount]	= useState<AccountManager | null>(null);
 
 	useLayoutEffect(() =>
 	{		// tenta ri recuperare un accesso precedente.
-		AccountManager.fromStorage()
-			.then(setAccount)
+		AccountManager.tryConnection()
+			.then(async () => setAccount(await AccountManager.fromStorage(sessionStorage)))
 			.catch(err => console.error(err));
 	}, []);
 

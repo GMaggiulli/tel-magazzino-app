@@ -1,5 +1,6 @@
 
-import { useMemo } from "preact/hooks";
+import { UserAccess } from "@/app/components/contexts";
+import { useContext, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 
 
@@ -63,16 +64,89 @@ export const ContainerProducts = (props: IContainerProducts): JSX.Element =>
 
 // --------------------------------------------------------
 
+export interface IFavoriteButtonProps
+{
+	productId: number,
+}
+
+export const FavoriteButton = (props: IFavoriteButtonProps): JSX.Element | null =>
+{
+	const { account } = useContext(UserAccess)!;
+
+	const [isFavUi, setFavUi]	= useState<boolean>(false);
+	const [isFav, setFav]		= useState<boolean>(false);
+
+	useLayoutEffect(() =>
+	{		// recupera se preferito da account.
+		if (!account)
+		{
+			return;
+		}
+
+		account.isFavourite(props.productId)
+			.then(setFav)
+			.catch(err => console.error(err));
+	}, [account]);
+
+	// assicura che ui è sincronizzato con il vero valore.
+	useLayoutEffect(() => setFavUi(isFav), [isFav]);
+
+
+	const onClick = (): void =>
+	{
+		if (!account)
+		{
+			return;
+		}
+
+		const value = !isFavUi;
+
+		setFavUi(value);
+
+		const failed = (err: any): void =>
+		{
+			console.error(err);
+			setFavUi(isFav);
+		}
+
+		if (value)
+		{
+			account.addFavorite(props.productId)
+				.then(() => setFav(value))
+				.catch(failed);
+		}
+		else
+		{
+			account.removeFavourite(props.productId)
+				.then(() => setFav(value))
+				.catch(failed);
+		}
+	}
+
+	if (!account)
+	{		// no pulsante se nessun account.
+		return null;
+	}
+
+	return (
+	<button class="btn btn-outline-primary" onClick={onClick} >
+		{isFavUi
+			? <i class="bi bi-star-fill"></i>
+			: <i class="bi bi-star"></i>}
+	</button>
+	);
+}
+
+
 export interface IProductGridProps
 {
+	productId: number,
 	title: string,
 	imgSrc: string,
 };
 
-
 export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 {
-
 	return (
 	<div class="card" >
 		<div class="card-img-top d-flex justify-content-center py-2">
@@ -81,10 +155,13 @@ export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 		<div class="card-body">
 			<p class="card-title">{props.title}</p>
 			<p class="card-text">Descrizione</p>
-			<button class="btn btn-primary">
-				<i class="bi bi-bag"></i>
-				<span class="m-1" >Scopri</span>
-			</button>
+			<div class="px-2 d-flex flex-row gap-1" >
+				<button class="btn btn-primary">
+					<i class="bi bi-bag"></i>
+					<span class="m-1" >Scopri</span>
+				</button>
+				<FavoriteButton productId={props.productId} />
+			</div>
 		</div>
 	</div>
 	);
