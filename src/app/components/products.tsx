@@ -1,6 +1,6 @@
 
-import { UserAccess } from "@/app/components/contexts";
-import { IDbProduct } from "@/scripts/WarehouseAccess";
+import { ProfileContent } from "@/app/components/contexts";
+import { IDbProduct } from "@/scripts/CatalogueAccess";
 import { useContext, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 
@@ -72,7 +72,7 @@ export interface IFavoriteButtonProps
 
 export const FavoriteButton = (props: IFavoriteButtonProps): JSX.Element | null =>
 {
-	const { account } = useContext(UserAccess)!;
+	const { account } = useContext(ProfileContent)!;
 
 	const [isFavUi, setFavUi]	= useState<boolean>(false);
 	const [isFav, setFav]		= useState<boolean>(false);
@@ -130,7 +130,8 @@ export const FavoriteButton = (props: IFavoriteButtonProps): JSX.Element | null 
 	}
 
 	return (
-	<button class="btn btn-outline-primary" onClick={onClick} >
+	<button class="btn btn-outline-primary" onClick={onClick}
+		title="Aggiungi ai preferiti." >
 		{isFavUi
 			? <i class="bi bi-star-fill"></i>
 			: <i class="bi bi-star"></i>}
@@ -138,6 +139,49 @@ export const FavoriteButton = (props: IFavoriteButtonProps): JSX.Element | null 
 	);
 }
 
+
+// --------------------------------------------------------
+
+export const CartButton = (props: IFavoriteButtonProps): JSX.Element =>
+{
+	const { account, showAccessPage } = useContext(ProfileContent)!;
+
+	const [count, setCount] = useState<number>(0);
+
+	const onClick = (): void =>
+	{
+		if (!account)
+		{
+			showAccessPage();
+			return;
+		}
+
+		window.alert("Aggiunto al carrello!");
+
+		account.addCart(props.productId)
+			.then(async () => setCount(await account.getCart(props.productId)))
+			.catch(err => console.error(err));
+	}
+
+
+	useLayoutEffect(() =>
+	{
+		account?.getCart(props.productId)
+			.then(setCount)
+			.catch(err => console.error(err));
+	}, [props.productId]);
+
+
+	return (
+	<button class="btn btn-outline-primary" onClick={onClick} title="Aggiungi al carrello." >
+		<i class="bi bi-bag"></i>
+		{count > 0 ? <span class="mx-1" >{count}</span> : null}
+	</button>
+	);
+}
+
+
+// --------------------------------------------------------
 
 export interface IProductGridProps
 {
@@ -156,6 +200,7 @@ export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 		<div class="card-body h-100">
 			<div class="px-2 d-flex flex-row gap-1 justify-content-center mb-4">
 				<FavoriteButton productId={product.product_id} />
+				<CartButton productId={product.product_id} />
 			</div>
 			<p class="card-title user-select-none">{product.name}</p>
 			<p class="card-text user-select-none fst-italic" style="font-size: 0.8em;">{product.description}</p>

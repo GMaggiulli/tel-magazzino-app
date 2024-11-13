@@ -1,5 +1,5 @@
 
-import { UserAccess } from "@/app/components/contexts";
+import { ProfileContent } from "@/app/components/contexts";
 import { AccountManager } from "@/scripts/AccountsManager";
 import { useContext, useLayoutEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
@@ -16,7 +16,7 @@ export const ViewAccountButton = (props: IViewAccountButtonProps): JSX.Element =
 {
 	const { onClick } = props;
 
-	const { account } = useContext(UserAccess)!;
+	const { account } = useContext(ProfileContent)!;
 
 	return (
 	<button class="btn btn-info d-flex flex-row gap-2 align-content-center justify-content-center"
@@ -87,7 +87,7 @@ export const InputPassword = (props: IInputPasswordProps): JSX.Element  =>
 
 export const ViewAccessRegister = (): JSX.Element =>
 {
-	const { changeAccount } = useContext(UserAccess)!;
+	const { changeAccount } = useContext(ProfileContent)!;
 
 	const [password, setPassword] = useState<string | null>(null);
 	const [firstName, setFirst] = useState<string>("");
@@ -151,7 +151,7 @@ export const ViewAccessRegister = (): JSX.Element =>
 
 export const ViewAccessLogin = (): JSX.Element =>
 {
-	const { changeAccount } = useContext(UserAccess)!;
+	const { changeAccount } = useContext(ProfileContent)!;
 
 	const [name, setName]			= useState<string>("");
 	const [password, setPassword]	= useState<string>("");
@@ -287,7 +287,7 @@ export const ViewAccount = (props: IViewAccountProps): JSX.Element =>
 
 export const ViewAccess = (): JSX.Element =>
 {
-	const { account, changeAccount } = useContext(UserAccess)!;
+	const { account, changeAccount } = useContext(ProfileContent)!;
 
 	if (account)
 	{

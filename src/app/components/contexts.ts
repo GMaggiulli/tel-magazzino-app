@@ -1,12 +1,15 @@
 import type { AccountManager } from "@/scripts/AccountsManager";
+import { CatalogueAccess } from "@/scripts/CatalogueAccess";
 import { createContext } from "preact";
 
-export type TAccountOrNone = AccountManager | null;
 
-export type TChangeAccountCallback = (account: TAccountOrNone) => void;
+export const ProfileContent = createContext<{
+	account: AccountManager | null,
+	changeAccount: (account: AccountManager | null) => void,
+	showAccessPage: () => void,
+} | null>(null);
 
 
-export const UserAccess = createContext<{
-	account: TAccountOrNone,
-	changeAccount: TChangeAccountCallback
+export const CatalogueContent = createContext<{
+	catalogue: CatalogueAccess,
 } | null>(null);

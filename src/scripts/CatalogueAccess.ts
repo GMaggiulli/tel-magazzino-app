@@ -70,6 +70,22 @@ else
 export class CatalogueAccess
 {
 
+	public async getById (
+		product_id: number
+	): Promise<IDbProduct>
+	{
+		const product = FAKE_PRODUCTS_DATABASE
+			.find(product => product.product_id === product_id);
+		
+		if (!product)
+		{
+			throw new Error();
+		}
+
+		return product;
+	}
+
+
 	public async searchProducts (
 		search: string
 	): Promise<IDbProduct[]>
@@ -83,11 +99,7 @@ export class CatalogueAccess
 			search = search
 				.trim().toLowerCase();
 
-			if (search.length < 3)
-			{
-				throw new Error('Ricerca troppo corta!');
-			}
-			else if (search.length > 100)
+			if (search.length > 100)
 			{
 				throw new Error('Ricerca troppo lunga!');
 			}

@@ -1,8 +1,9 @@
 
+import { CatalogueContent } from "@/app/components/contexts";
 import { ItemProduct, WaitProductLoading, MsgNoProducts, ContainerProducts } from "@/app/components/products";
 import { SearchQuery } from "@/app/components/search";
-import { CatalogueAccess, IDbProduct } from "@/scripts/WarehouseAccess";
-import { useEffect, useLayoutEffect, useMemo, useState } from "preact/hooks";
+import { CatalogueAccess, IDbProduct } from "@/scripts/CatalogueAccess";
+import { useContext, useEffect, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { useSessionStorage } from "usehooks-ts";
 
@@ -37,7 +38,7 @@ export const ViewStore = (): JSX.Element =>
 	const [productslist, updateProducts]	= useState<IDbProduct[]>([]);
 	const [working, setWorking]				= useState<boolean>(true);
 
-	const catalogue = useMemo<CatalogueAccess>(() => new CatalogueAccess(), []);
+	const { catalogue } = useContext(CatalogueContent)!;
 
 
 	/**

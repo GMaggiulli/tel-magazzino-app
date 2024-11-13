@@ -7,6 +7,7 @@ export interface IProfile
 	last_name: string,
 	birth_date: Date,
 	favourites: Set<number>,
+	cart: Map<number, number>,
 }
 
 
@@ -106,6 +107,7 @@ export const LoadAllProfiles = (storage: Storage) =>
 
 				let favourites = new Set<number>();
 				let birth_date;
+				let cart = new Map();
 
 				try { birth_date = new Date(Date.parse(profile["birth_date"] ?? "")); }
 				catch (e) { console.warn(e); }
@@ -122,12 +124,22 @@ export const LoadAllProfiles = (storage: Storage) =>
 				}
 				catch (e) { console.warn(e); }
 
+				try
+				{
+					for (const [id, amount] of Object.entries(profile["cart"]))
+					{
+						cart.set(Number.parseInt(id), amount);
+					}
+				}
+				catch (e) { console.warn(e); }
+
 				FAKE_ACCOUNT_DATABASE.set(name, {
 					first_name: profile["first_name"] ?? "Error",
 					last_name: profile["last_name"] ?? "Error",
 					birth_date: birth_date,
 					favourites: favourites,
 					password: profile["password"],
+					cart: cart,
 				} as IProfile);
 			}
 		}
@@ -144,6 +156,7 @@ export const SaveAllProfiles = (storage: Storage) =>
 			first_name: profile.first_name,
 			last_name: profile.last_name,
 			favourites: [...profile.favourites],
+			cart: Object.fromEntries(profile.cart),
 		}), name: name }));
 	
 	storage.setItem("__users", JSON.stringify(obj));
@@ -235,6 +248,7 @@ export class FakeAccountManager
 			last_name: last_name,
 			birth_date: new Date(birth_date),
 			favourites: new Set(),
+			cart: new Map(),
 		};
 
 		FAKE_ACCOUNT_DATABASE.set(email, account);
@@ -382,6 +396,50 @@ export class FakeAccountManager
 	): Promise<boolean>
 	{
 		return this.#__profile.favourites.has(product_id);
+	}
+
+
+	public async addCart (
+		product_id: number,
+	): Promise<void>
+	{
+		this.#__profile.cart.set(product_id,
+			(this.#__profile.cart.get(product_id) ?? 0) + 1);
+
+		SaveAllProfiles(localStorage);
+	}
+
+
+	public async removeCart (
+		product_id: number
+	): Promise<void>
+	{
+		const amount = (this.#__profile.cart.get(product_id) ?? 1) - 1;
+
+		if (amount === 0)
+		{
+			this.#__profile.cart.delete(product_id);
+		}
+		else
+		{
+			this.#__profile.cart.set(product_id, amount);
+		}
+
+		SaveAllProfiles(localStorage);
+	}
+
+
+	public async getCart (
+		product_id: number
+	): Promise<number>
+	{
+		return this.#__profile.cart.get(product_id) ?? 0;
+	}
+
+
+	public async getCartList (): Promise<number[]>
+	{
+		return [...this.#__profile.cart.keys()];
 	}
 
 }
