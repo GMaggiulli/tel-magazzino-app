@@ -1,6 +1,7 @@
 
+import { UserAccess } from "@/app/components/contexts";
 import { AccountManager } from "@/scripts/AccountsManager";
-import { useState } from "preact/hooks";
+import { useContext, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 
 
@@ -9,19 +10,20 @@ import type { JSX } from "preact/jsx-runtime";
 export interface IViewAccountButtonProps
 {
 	onClick: () => void,
-	account?: AccountManager | null,
 }
 
 export const ViewAccountButton = (props: IViewAccountButtonProps): JSX.Element =>
 {
 	const { onClick } = props;
 
+	const { account, changeAccount } = useContext(UserAccess)!;
+
 	return (
 	<button class="btn btn-info d-flex flex-row gap-2 align-content-center justify-content-center"
 	onClick={onClick} >
 		<i class="bi bi-person-circle"></i>
-		<span class="fs-6" >{props.account
-			? `Bentornato ${props.account.getAccount()?.first_name}`
+		<span class="fs-6" >{account
+			? `Bentornato ${account.getAccount()?.first_name}`
 			: "Accedi"}</span>
 	</button>
 	);
@@ -30,14 +32,9 @@ export const ViewAccountButton = (props: IViewAccountButtonProps): JSX.Element =
 
 // --------------------------------------------------------
 
-export interface IViewAccessRegisterProps
+export const ViewAccessRegister = (): JSX.Element =>
 {
-	onChangeAccount: (account: AccountManager) => void,
-}
-
-export const ViewAccessRegister = (props: IViewAccessRegisterProps): JSX.Element =>
-{
-	const { onChangeAccount } = props;
+	const { changeAccount } = useContext(UserAccess)!;
 
 	const [firstName, setFirst] = useState<string>("");
 	const [lastName, setLast] = useState<string>("");
@@ -53,7 +50,7 @@ export const ViewAccessRegister = (props: IViewAccessRegisterProps): JSX.Element
 		.then(account =>
 			{
 				account.saveAccess();
-				onChangeAccount(account);
+				changeAccount(account);
 			})
 		.catch(err => alert(err));
 	}
@@ -109,14 +106,9 @@ export const ViewAccessRegister = (props: IViewAccessRegisterProps): JSX.Element
 
 // --------------------------------------------------------
 
-export interface IViewAccessLoginProps
+export const ViewAccessLogin = (): JSX.Element =>
 {
-	onChangeAccount: (account: AccountManager) => void,
-}
-
-export const ViewAccessLogin = (props: IViewAccessLoginProps): JSX.Element =>
-{
-	const { onChangeAccount } = props;
+	const { changeAccount } = useContext(UserAccess)!;
 
 	const onRecoverPassword = (): void =>
 	{
@@ -170,32 +162,26 @@ export const ViewAccount = (props: IViewAccountProps): JSX.Element =>
 
 // --------------------------------------------------------
 
-export interface IViewAccessProps
+export const ViewAccess = (): JSX.Element =>
 {
-	account?: AccountManager | null,
-	onChangeAccount: (account: AccountManager | null) => void,
-}
+	const { account, changeAccount } = useContext(UserAccess)!;
 
-export const ViewAccess = (props: IViewAccessProps): JSX.Element =>
-{
-	const { onChangeAccount } = props;
-
-	if (props.account)
+	if (account)
 	{
 		const onLogout = (): void =>
 		{
-			props.account!.leaveAccess();
-			onChangeAccount(null);
+			account.leaveAccess();
+			changeAccount(null);
 		}
 
-		return (<ViewAccount account={props.account}
+		return (<ViewAccount account={account}
 			onLogout={onLogout} />);
 	}
 
 	return (
 	<div class="d-flex flex-row gap-4 px-4 w-100 h-100 align-items-center" style="max-width: 1000px;" >
-		<ViewAccessRegister onChangeAccount={onChangeAccount} />
-		<ViewAccessLogin onChangeAccount={onChangeAccount} />
+		<ViewAccessRegister />
+		<ViewAccessLogin />
 	</div>);
 }
 
