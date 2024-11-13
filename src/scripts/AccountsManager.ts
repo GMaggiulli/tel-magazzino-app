@@ -13,7 +13,7 @@ export interface IProfile
 export interface IAccountStorage
 {
 	name: string,
-	password: number,
+	password: string,
 }
 
 
@@ -46,10 +46,10 @@ export const parseAccountString = (jsonstring: string): IAccountStorage | null =
 	}
 
 	const name: string = data["name"];
-	const password: number = data["password"];
+	const password: string = data["password"];
 
 	if (typeof name !== 'string'
-		|| typeof password !== 'number')
+		|| typeof password !== 'string')
 	{
 		return null;
 	}
@@ -152,26 +152,26 @@ export const SaveAllProfiles = (storage: Storage) =>
 
 export const isValidEmail = (value: string): boolean =>
 {
-	return value.split("@").length === 1;
+	return value.split("@").length === 2;
 }
 
 
-export class AccountManager
+/**
+ * oggeto che gestisce la registrazione e modifica del profilo utente.
+ */
+export class FakeAccountManager
 {
 	#__name: string;
 
 	#__profile: IProfile;
 
-	#__storage: Storage;
-
 	#__is_access: boolean;
 
 
-	private constructor (name: string, account: IProfile, storage: Storage)
+	protected constructor (name: string, account: IProfile)
 	{
 		this.#__name		= name;
 		this.#__profile		= account;
-		this.#__storage		= storage;
 		this.#__is_access	= true;
 	}
 
@@ -189,7 +189,7 @@ export class AccountManager
 
 
 	/**
-	 * attemps connection to database.
+	 * controlla la connessione con il database.
 	 */
 	public static async tryConnection (): Promise<void>
 	{
@@ -198,8 +198,7 @@ export class AccountManager
 
 
 	/**
-	 * create a new account and returns an access object.
-	 * if the account already exists will throw an error.
+	 * crea un nuovo account ed esegue il suo login.
 	 */
 	public static async fromRegister (
 		storage: Storage,
@@ -241,29 +240,56 @@ export class AccountManager
 		FAKE_ACCOUNT_DATABASE.set(email, account);
 		SaveAllProfiles(localStorage);
 
-		return new AccountManager(email, account, storage);
+		storage.setItem('account', JSON.stringify({
+			name: email, password: password,
+		}));
+
+		return new AccountManager(email, account);
 	}
 
 
 	/**
-	 * recovers the previous access from the device.
+	 * esegue l'accesso con un account già esistente.
+	 */
+	public static async fromLogin (
+		storage: Storage,
+		email: string,
+		password: string
+	): Promise<AccountManager>
+	{
+		const profile = FAKE_ACCOUNT_DATABASE.get(email);
+
+		if (!profile || passwordHash(password) !== profile.password)
+		{		// mostra account non esistente se passwrod è sbagliata.
+			throw ErrorNoProfile(email);
+		}
+
+		storage.setItem('account', JSON.stringify({
+			name: email, password: password,
+		}));
+
+		return new AccountManager(email, profile);
+	}
+
+
+	/**
+	 * recupera l'accesso dallo storage.
 	 */
 	public static async fromStorage (
 		storage: Storage
 	): Promise<AccountManager | null>
 	{
-		const prevAccess: IAccountStorage | null =
-			parseAccountString(`${storage.getItem('account')}`);
-
+		const prevAccess: IAccountStorage | null = parseAccountString(
+			`${storage.getItem('account')}`);
+		
 		if (prevAccess)
 		{
-			const account: IProfile | undefined =
-				FAKE_ACCOUNT_DATABASE.get(prevAccess.name);
-
-			if (account && account.password == prevAccess.password)
+			try
 			{
-				return new AccountManager(prevAccess.name, account, storage);
+				return await AccountManager
+					.fromLogin(storage, prevAccess.name, prevAccess.password);
 			}
+			catch (e) { console.error(e); }
 		}
 
 		return null;
@@ -271,43 +297,9 @@ export class AccountManager
 
 
 	/**
-	 * log-in
+	 * chiude l'accesso corrente.
 	 */
-	public static async fromLogin (
-		storage: Storage,
-		name: string,
-		password: string
-	): Promise<AccountManager>
-	{
-		const profile = FAKE_ACCOUNT_DATABASE.get(name);
-
-		if (!profile || passwordHash(password) !== profile.password)
-		{		// mostra account non esistente se passwrod è sbagliata.
-			throw ErrorNoProfile(name);
-		}
-
-		return new AccountManager(name, profile, storage);
-	}
-
-
-	public saveAccess (): void
-	{
-		if (!this.#__is_access)
-		{
-			throw ErrorAccess();
-		}
-
-		this.#__storage.setItem('account', JSON.stringify({
-			name: this.#__name,
-			password: this.#__profile.password,
-		}));
-	}
-
-
-	/**
-	 * exits the current access of the account.
-	 */
-	public leaveAccess (): void
+	public logout (): void
 	{
 		if (!this.#__is_access)
 		{
@@ -319,6 +311,29 @@ export class AccountManager
 	}
 
 
+	public async changePassword (
+		current_password: string,
+		new_password: string
+	): Promise<void>
+	{
+		const profile = this.#__profile;
+
+		const oldhash = passwordHash(current_password);
+
+		if (oldhash != profile.password)
+		{
+			throw new Error("Password doesn't match!");
+		}
+
+		profile.password = passwordHash(new_password);
+		SaveAllProfiles(localStorage);
+	}
+
+
+	/**
+	 * aggiunge il prodotto tra i preferiti e fallisce se questo è già tra
+	 * i preferiti.
+	 */
 	public async addFavorite (product_id: number): Promise<void>
 	{
 		if (!this.#__is_access)
@@ -338,6 +353,12 @@ export class AccountManager
 	}
 
 
+	/**
+	 * rimuove il prodotto dai preferiti e ritorna se questo era presente
+	 * nei preferiti oppure no.
+	 * 
+	 * se il prodotto non è tra i preferiti non fallirà.
+	 */
 	public async removeFavourite (product_id: number): Promise<boolean>
 	{
 		if (!this.#__is_access)
@@ -353,6 +374,9 @@ export class AccountManager
 	}
 
 
+	/**
+	 * controlla se l'utente ha questo prodotto tra i suoi preferiti.
+	 */
 	public async isFavourite (
 		product_id: number
 	): Promise<boolean>
@@ -361,4 +385,11 @@ export class AccountManager
 	}
 
 }
+
+
+/**
+ * sovrascrive il finto database con quello vero.
+ */
+export class AccountManager extends FakeAccountManager
+{}
 

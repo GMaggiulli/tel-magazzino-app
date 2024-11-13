@@ -1,8 +1,8 @@
 
 import { ItemProduct, WaitProductLoading, MsgNoProducts, ContainerProducts } from "@/app/components/products";
 import { SearchQuery } from "@/app/components/search";
-import { DatabaseAccess, IProduct } from "@/scripts/DatabaseAccess";
-import { useEffect, useState } from "preact/hooks";
+import { CatalogueAccess, IDbProduct } from "@/scripts/WarehouseAccess";
+import { useEffect, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { useSessionStorage } from "usehooks-ts";
 
@@ -33,54 +33,46 @@ export const ViewStoreButton = (props: IViewStoreButtonProps): JSX.Element =>
 export const ViewStore = (): JSX.Element =>
 {
 	const [queryString, changeQuery] = useSessionStorage('last-query', "");
-	const [isLoading, setLoading] = useState<boolean>(true);
-	const [foundProducts, setProducts] = useState<IProduct[]>([]);
 
-	const productsGrid = foundProducts
-		.map(product => (<ItemProduct
-			productId={product.id}
-			title={product.title}
-			imgSrc={product.imgSrc} />));
+	const [productslist, updateProducts]	= useState<IDbProduct[]>([]);
+	const [working, setWorking]				= useState<boolean>(true);
+
+	const catalogue = useMemo<CatalogueAccess>(() => new CatalogueAccess(), []);
 
 
-	const updateQuery = (): NodeJS.Timeout =>
+	/**
+	 * aggiorna la lista di prodotti visualizzati.
+	 */
+	const onQueryUpdate = (): void =>
 	{
-		const db = new DatabaseAccess();
+		setWorking(true);
 
-		setLoading(true);
-
-		return setTimeout(() =>
-		{
-			setProducts(db.findByName(queryString));
-			setLoading(false);
-		}, Math.random() * 500);
+		catalogue.searchProducts(queryString)
+			.then(updateProducts)
+			.catch((err) =>
+			{
+				console.error(err);
+				updateProducts([]);
+			})
+			.finally(() => setWorking(false));
 	}
 
-
-	useEffect(() =>
+	useLayoutEffect(() =>
 	{
-		// finto caricamento / lag del database.
+		setWorking(true);
 
-		let fakeTimeout: null | NodeJS.Timeout = null;
-
-		// evitiamo di inviare una richiesta per ogni carattere scritto.
-		// piccolo delay per rimuovere flickering.
-		const keyTimeout = setTimeout(() =>
-		{		// hack! delay ridotto a 0 se la query è vuota.
-			fakeTimeout = updateQuery();
-		}, queryString.length > 0 ? 300 : 0);
+		const keyTimeout = setTimeout(() => onQueryUpdate(),
+			queryString.length > 0 ? 300 : 0);
 
 		return () =>
 		{
 			clearTimeout(keyTimeout);
-
-			if (fakeTimeout)
-			{
-				clearTimeout(fakeTimeout);
-			}
 		}
 	}, [queryString]);
 
+
+	const productsGrid = productslist
+		.map(product => (<ItemProduct product={product} />));
 
 	return (<>
 		<aside class="h-100 bg-body-secondary rounded p-2 d-flex flex-column" style="min-width: 300px;" >
@@ -122,10 +114,13 @@ export const ViewStore = (): JSX.Element =>
 				<SearchQuery name="string-query-products"
 					value={queryString}
 					onChange={changeQuery}
-					onUpdateSearch={updateQuery} />
+					onUpdateSearch={onQueryUpdate} />
+				{working
+					? <p class="m-2" >Eseguento la query...</p>
+					: <p class="m-2" >Prodotti trovati: {productsGrid.length}</p>}
 			</div>
 
-			{isLoading ? <WaitProductLoading />
+			{working ? <WaitProductLoading />
 				: productsGrid.length === 0
 					? <MsgNoProducts />
 					: <ContainerProducts children={productsGrid} />}

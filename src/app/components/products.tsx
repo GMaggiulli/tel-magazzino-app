@@ -1,5 +1,6 @@
 
 import { UserAccess } from "@/app/components/contexts";
+import { IDbProduct } from "@/scripts/WarehouseAccess";
 import { useContext, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 
@@ -140,27 +141,27 @@ export const FavoriteButton = (props: IFavoriteButtonProps): JSX.Element | null 
 
 export interface IProductGridProps
 {
-	productId: number,
-	title: string,
-	imgSrc: string,
+	product: IDbProduct,
 };
 
 export const ItemProduct = (props: IProductGridProps): JSX.Element =>
 {
+	const { product } = props;
+
 	return (
 	<div class="card" >
 		<div class="card-img-top d-flex justify-content-center py-2">
-			<img class="user-select-none" height={150} src={props.imgSrc} />
+			<img class="user-select-none" height={150} src={product.url_image} />
 		</div>
 		<div class="card-body">
-			<p class="card-title">{props.title}</p>
-			<p class="card-text">Descrizione</p>
+			<p class="card-title">{product.name}</p>
+			<p class="card-text">{product.description}</p>
 			<div class="px-2 d-flex flex-row gap-1" >
 				<button class="btn btn-primary">
 					<i class="bi bi-bag"></i>
 					<span class="m-1" >Scopri</span>
 				</button>
-				<FavoriteButton productId={props.productId} />
+				<FavoriteButton productId={product.product_id} />
 			</div>
 		</div>
 	</div>

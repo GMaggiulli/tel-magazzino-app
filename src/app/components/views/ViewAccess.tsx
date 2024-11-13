@@ -1,7 +1,7 @@
 
 import { UserAccess } from "@/app/components/contexts";
 import { AccountManager } from "@/scripts/AccountsManager";
-import { useContext, useState } from "preact/hooks";
+import { useContext, useLayoutEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 
 
@@ -32,27 +32,79 @@ export const ViewAccountButton = (props: IViewAccountButtonProps): JSX.Element =
 
 // --------------------------------------------------------
 
+export interface IInputPasswordProps
+{
+	onChange: (password: string) => void,
+	onValidated: (isValid: boolean) => void,
+}
+
+export const InputPassword = (props: IInputPasswordProps): JSX.Element  =>
+{
+	const { onChange, onValidated } = props;
+
+	const [password1, setPassword1] = useState<string>("");
+	const [password2, setPassword2] = useState<string>("");
+
+	useLayoutEffect(() =>
+	{
+		if (password1.length <= 3 || password2.length <= 2)
+		{
+			onValidated(false);
+			return;
+		}
+
+		if (password1 === password2)
+		{
+			onValidated(true);
+			onChange(password1);
+		}
+		else
+		{
+			onValidated(false);
+		}
+	}, [password1, password2]);
+
+	return (
+		<div class="mb-4 d-flex flex-column gap-2">
+			<input type="text" class="form-control" placeholder="Password"
+				value={password1} onInput={ev => setPassword1((ev.target as HTMLInputElement).value)} />
+			<input type="text" class="form-control" placeholder="Ripeti Password"
+				value={password2} onInput={ev => setPassword2((ev.target as HTMLInputElement).value)} />
+			
+			{password1.length > 0 || password2.length > 0 ?
+				password1 === password2
+					? password1.length > 3
+						? <span class="text-success" >Ok!</span>
+						: <span >Password troppo corta!</span>
+					: <span >Password non identiche!</span>
+				: null}
+		</div>
+	);
+}
+
+
+// --------------------------------------------------------
+
 export const ViewAccessRegister = (): JSX.Element =>
 {
 	const { changeAccount } = useContext(UserAccess)!;
 
+	const [password, setPassword] = useState<string | null>(null);
 	const [firstName, setFirst] = useState<string>("");
 	const [lastName, setLast] = useState<string>("");
 	const [birthday, setBirthday] = useState<string>("");
 	const [email, setEmail] = useState<string>("");
-	const [password1, setPassword1] = useState<string>("");
-	const [password2, setPassword2] = useState<string>("");
-
 
 	const onClickRegister = (): void =>
 	{
-		AccountManager.fromRegister(sessionStorage, email, password1, firstName, lastName, birthday)
-		.then(account =>
-			{
-				account.saveAccess();
-				changeAccount(account);
-			})
-		.catch(err => alert(err));
+		if (typeof password !== 'string')
+		{
+			return;
+		}
+
+		AccountManager.fromRegister(sessionStorage, email, password, firstName, lastName, birthday)
+			.then(changeAccount)
+			.catch(err => alert(err));
 	}
 
 
@@ -82,20 +134,11 @@ export const ViewAccessRegister = (): JSX.Element =>
 					value={email} onInput={ev => setEmail((ev.target as HTMLInputElement).value)} />
 			</div>
 
-			<div class="mb-4 d-flex flex-column gap-2">
-				<input type="text" class="form-control" placeholder="Password"
-					value={password1} onInput={ev => setPassword1((ev.target as HTMLInputElement).value)} />
-				<input type="text" class="form-control" placeholder="Ripeti Password"
-					value={password2} onInput={ev => setPassword2((ev.target as HTMLInputElement).value)} />
-				
-				{password1.length > 0 || password2.length > 0 ?
-					password1 === password2
-						? <span class="text-success" >Ok!</span>
-						: <span >Password non identiche!</span>
-					: null}
-			</div>
+			<InputPassword onChange={setPassword}
+				onValidated={valid => setPassword(valid ? password : null)} />
 
-			<button type="submit" class="btn btn-primary" onClick={onClickRegister} >
+			<button type="submit" class="btn btn-primary" onClick={onClickRegister}
+				disabled={typeof password !== 'string'} >
 				Registrati
 			</button>
 		</form>
@@ -126,11 +169,7 @@ export const ViewAccessLogin = (): JSX.Element =>
 	const onClickLogin = (): void =>
 	{
 		AccountManager.fromLogin(sessionStorage, name, password)
-			.then(access =>
-			{		// accesso ad account esistente ottenuto!
-				changeAccount(access);
-				access.saveAccess();
-			})
+			.then(changeAccount)
 			.catch(err => alert(err));
 	}
 
@@ -171,11 +210,74 @@ export interface IViewAccountProps
 
 export const ViewAccount = (props: IViewAccountProps): JSX.Element =>
 {
-	const { onLogout } = props;
+	const { account, onLogout } = props;
+
+	const [oldPassword, setOldPassword]	= useState<string>("");
+	const [password, setPassword]		= useState<string | null>(null);
+
+	const profile = account.getProfile();
+
+
+	const onChangePassword = (): void =>
+	{
+		if (typeof password !== 'string')
+		{
+			return;
+		}
+
+		account.changePassword(oldPassword, password)
+			.then(() =>
+			{
+				window.alert("Password cambiata! Esegui di nuovo il login.");
+				onLogout();
+			})
+			.catch(err =>
+			{
+				console.error(err);
+				window.alert("Errore. Controlla se hai digitato corretamente la vecchia password.");
+			});
+	}
+
+
+	const onAskLogout = (): void =>
+	{
+		if (!window.confirm("Sicuro di voler uscire?"))
+		{
+			return;
+		}
+
+		onLogout();
+	}
+
 
 	return (
-	<div class="container" >
-		<button class="btn btn-danger" onClick={onLogout} >Esci</button>
+	<div class="container-fluid h-100 d-flex flex-column gap-1" >
+
+		<div class="d-flex flex-row gap-2" >
+			<div class="bg-body-secondary rounded" style="min-width: 150px; min-height: 150px;" ></div>
+			<div class="d-flex flex-column w-100" >
+				<p class="user-select-none" >Bentornato utente!</p>
+				<div class="d-flex flex-row gap-3" >
+					<h2>{profile.first_name}</h2>
+					<h2>{profile.last_name}</h2>
+				</div>
+			</div>
+			<button class="btn btn-danger" style="min-width: 96px; height: 48px;" onClick={onAskLogout} >Esci</button>
+		</div>
+
+		<div class="container-fluid h-100 overflow-y-auto gap-2" >
+			<p>Data di nascita: {profile.birth_date.toUTCString()}</p>
+			
+			<div class="d-flex flex-column bg-body-secondary rounded p-2" style="width: 80%; max-width: 500px;" >
+				<p class="fw-bold" >Cambia la password</p>
+				<input class="form-control mb-3" type="password"
+					placeholder="Vecchia password"
+					value={oldPassword}
+					onInput={ev => setOldPassword((ev.target as HTMLInputElement).value)} />
+				<InputPassword onChange={setPassword} onValidated={valid => setPassword(valid ? password : null)} />
+				<button class="btn btn-outline-danger" disabled={typeof password !== 'string'} onClick={onChangePassword} >Cambia</button>
+			</div>
+		</div>
 	</div>
 	);
 }
@@ -191,8 +293,8 @@ export const ViewAccess = (): JSX.Element =>
 	{
 		const onLogout = (): void =>
 		{
-			account.leaveAccess();
 			changeAccount(null);
+			account.logout();
 		}
 
 		return (<ViewAccount account={account}
