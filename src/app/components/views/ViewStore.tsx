@@ -1,7 +1,8 @@
 
-import { CatalogueContent } from "@/app/components/contexts";
+import { CatalogueContent, ProfileContent } from "@/app/components/contexts";
 import { ItemProduct, WaitProductLoading, MsgNoProducts, ContainerProducts } from "@/app/components/products";
 import { SearchQuery } from "@/app/components/search";
+import { ViewNeedAccess } from "@/app/components/views/ViewNeedAccess";
 import { CatalogueAccess, IDbProduct } from "@/scripts/CatalogueAccess";
 import { useContext, useEffect, useLayoutEffect, useMemo, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
@@ -31,7 +32,7 @@ export const ViewStoreButton = (props: IViewStoreButtonProps): JSX.Element =>
 
 // --------------------------------------------------------
 
-export const ViewStore = (): JSX.Element =>
+export const ViewStoreSearch = (): JSX.Element =>
 {
 	const [queryString, changeQuery] = useSessionStorage('last-query', "");
 
@@ -39,7 +40,6 @@ export const ViewStore = (): JSX.Element =>
 	const [working, setWorking]				= useState<boolean>(true);
 
 	const { catalogue } = useContext(CatalogueContent)!;
-
 
 	/**
 	 * aggiorna la lista di prodotti visualizzati.
@@ -76,55 +76,39 @@ export const ViewStore = (): JSX.Element =>
 		.map(product => (<ItemProduct product={product} />));
 
 	return (<>
-		{/* <aside class="h-100 bg-body-secondary rounded p-2 d-flex flex-column" style="min-width: 300px;" >
-			<p class="fw-bold fs-5 mx-2" >Filtri</p>
-			<div class="w-100 h-100 d-flex flex-column overflow-y-auto gap-2" >
+	<div class="container w-100 py-2" >
+		<SearchQuery name="string-query-products"
+			value={queryString}
+			onChange={changeQuery}
+			onUpdateSearch={onQueryUpdate} />
+		{working
+			? <p class="m-2" >Eseguendo la query...</p>
+			: <p class="m-2" >Prodotti trovati: {productsGrid.length}</p>}
+	</div>
 
-				<div class="container border border-secondary rounded p-2" >
-					<p class="fs-6 fw-bold m-2" >Gruppi</p>
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" value="" id="filter-bookmarks" />
-						<label class="form-check-label user-select-none" for="filter-bookmarks">
-							Preferiti
-						</label>
-					</div>
-				</div>
+	{working ? <WaitProductLoading />
+		: productsGrid.length === 0
+			? <MsgNoProducts />
+			: <ContainerProducts children={productsGrid} />}
+	</>);
+}
 
-				<div class="container border border-secondary rounded p-2" >
-					<p class="fs-6 fw-bold m-2" >Dispositivi</p>
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" value="" id="filter-phones" />
-						<label class="form-check-label user-select-none" for="filter-phones">Telefoni</label>
-					</div>
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" value="" id="filter-computers" />
-						<label class="form-check-label user-select-none" for="filter-computers">Computer</label>
-					</div>
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" value="" id="filter-screens" />
-						<label class="form-check-label user-select-none" for="filter-screens">Schermi</label>
-					</div>
-				</div>
 
-			</div>
-		</aside> */}
+// --------------------------------------------------------
 
+export const ViewStore = (): JSX.Element =>
+{
+	const { account } = useContext(ProfileContent)!;
+
+	if (!account)
+	{
+		return (<ViewNeedAccess />);
+	}
+
+
+	return (<>
 		<main class="w-100 h-100 d-flex flex-column" >
-
-			<div class="container w-100 py-2" >
-				<SearchQuery name="string-query-products"
-					value={queryString}
-					onChange={changeQuery}
-					onUpdateSearch={onQueryUpdate} />
-				{working
-					? <p class="m-2" >Eseguendo la query...</p>
-					: <p class="m-2" >Prodotti trovati: {productsGrid.length}</p>}
-			</div>
-
-			{working ? <WaitProductLoading />
-				: productsGrid.length === 0
-					? <MsgNoProducts />
-					: <ContainerProducts children={productsGrid} />}
+			<ViewStoreSearch /> 
 		</main>
 	</>);
 }

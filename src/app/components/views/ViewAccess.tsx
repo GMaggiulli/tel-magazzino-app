@@ -179,7 +179,7 @@ export const ViewAccessLogin = (): JSX.Element =>
 			<p class="fw-bold fs-2 mx-auto user-select-none" >Accedi</p>
 
 			<div class="mb-3">
-				<label for="login-email" class="form-label user-select-none">Email</label>
+				<label for="login-email" class="form-label user-select-none">Nome</label>
 				<input type="email" class="form-control" id="login-email" placeholder="name@example.com"
 					value={name} onInput={ev => setName((ev.target as HTMLInputElement).value)} />
 			</div>
@@ -216,6 +216,8 @@ export const ViewAccount = (props: IViewAccountProps): JSX.Element =>
 	const [password, setPassword]		= useState<string | null>(null);
 
 	const profile = account.getProfile();
+
+	console.log(account)
 
 
 	const onChangePassword = (): void =>

@@ -1,5 +1,6 @@
 
 import { CatalogueContent, ProfileContent } from "@/app/components/contexts";
+import { ViewNeedAccess } from "@/app/components/views/ViewNeedAccess";
 import { useContext, useLayoutEffect, useState } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime"
 
@@ -20,21 +21,6 @@ export const ViewCartButton = (props: IViewCartButtonProps): JSX.Element =>
 		<i class="bi bi-cart"></i>
 		<span class="fs-6 fw-bold" >Carrello</span>
 	</button>
-	);
-}
-
-
-// --------------------------------------------------------
-
-export const ViewNeedAccess = (): JSX.Element =>
-{
-	const { showAccessPage } = useContext(ProfileContent)!;
-
-	return (
-	<div class="container h-50" >
-		<p class="mx-auto" style="width: fit-content;" >Devi registrarti!</p>
-		<button class="btn btn-primary" style="width: 96px;" onClick={showAccessPage} >Accedi</button>
-	</div>
 	);
 }
 

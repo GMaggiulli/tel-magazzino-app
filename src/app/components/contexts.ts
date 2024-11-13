@@ -5,7 +5,7 @@ import { createContext } from "preact";
 
 export const ProfileContent = createContext<{
 	account: AccountManager | null,
-	changeAccount: (account: AccountManager | null) => void,
+	changeAccount: (account: FakeAccountManager | null) => void,
 	showAccessPage: () => void,
 } | null>(null);
 

@@ -220,7 +220,7 @@ export class FakeAccountManager
 		first_name: string,
 		last_name: string,
 		birth_date: string
-	): Promise<AccountManager>
+	): Promise<FakeAccountManager>
 	{
 		if (email.length < 3 || email.length > 40)
 		{
@@ -258,7 +258,7 @@ export class FakeAccountManager
 			name: email, password: password,
 		}));
 
-		return new AccountManager(email, account);
+		return new FakeAccountManager(email, account);
 	}
 
 
@@ -269,7 +269,7 @@ export class FakeAccountManager
 		storage: Storage,
 		email: string,
 		password: string
-	): Promise<AccountManager>
+	): Promise<FakeAccountManager>
 	{
 		const profile = FAKE_ACCOUNT_DATABASE.get(email);
 
@@ -282,7 +282,7 @@ export class FakeAccountManager
 			name: email, password: password,
 		}));
 
-		return new AccountManager(email, profile);
+		return new FakeAccountManager(email, profile);
 	}
 
 
@@ -449,5 +449,82 @@ export class FakeAccountManager
  * sovrascrive il finto database con quello vero.
  */
 export class AccountManager extends FakeAccountManager
-{}
+{
+
+	#__token: string;
+
+
+	protected constructor (name: string, account: IProfile, token: string)
+	{
+		super(name, account);
+
+		this.#__token = token;
+	}
+
+
+	public static async fromLogin (
+		storage: Storage,
+		email: string,
+		password: string
+	): Promise<FakeAccountManager>
+	{
+		const tokenrequest = await fetch("http://localhost:8080/auth", {
+			method: 'POST',
+			headers: {
+				Authorization: "Basic bWFyaW9fcm9zc2k6cGFzc3dvcmQxMjM=",
+			}
+		});
+
+		const jsondata = await tokenrequest.json();
+
+		if (!jsondata['success'])
+		{
+			throw ErrorNoProfile(email);
+		}
+
+		const token = jsondata["token"];
+
+		const userRequest = await fetch(`http://localhost:8080/users/searchByUser?user=mario_rossi`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			}
+		});
+
+		const userjson = await userRequest.json();
+
+		return new AccountManager(email, {
+			first_name: userjson["data"]["firstName"],
+			last_name: userjson["data"]["lastName"],
+			birth_date: new Date(),
+			cart: new Map(),
+			favourites: new Set(),
+			password: 0
+		}, token);
+	}
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																																																										// AccountManager = FakeAccountManager; // shhhh....
 
